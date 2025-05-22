@@ -1,10 +1,3 @@
-//
-//  GameScene.swift
-//  FireB_WaterG
-//
-//  Created by Aluno a25982 Teste on 09/05/2025.
-//
-
 import SpriteKit
 import GameplayKit
 
@@ -14,6 +7,7 @@ struct Categoria {
     static let player : UInt32 = 0b1        // 1
     static let deathPool : UInt32 = 0b10    // 2
     static let ground : UInt32 = 0b100      // 4 (para chão e paredes)
+    static let lever : UInt32 = 0b1000      // 8 (alavanca)
 }
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
@@ -24,6 +18,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var leftButton: SKSpriteNode!
     var rightButton: SKSpriteNode!
     var jumpButton: SKSpriteNode!
+    
+    var lever: SKSpriteNode!
     
     var moveLeft = false
     var moveRight = false
@@ -38,6 +34,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         createMap()
         createDeathPools()
         createControls()
+        createLever()
     }
     
     func createPlayer() {
@@ -52,9 +49,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         player.physicsBody?.restitution = 0
         player.physicsBody?.friction = 0.2
         
-        // Configurações de física para contato
         player.physicsBody?.categoryBitMask = Categoria.player
-        player.physicsBody?.contactTestBitMask = Categoria.deathPool
+        player.physicsBody?.contactTestBitMask = Categoria.deathPool | Categoria.ground
         player.physicsBody?.collisionBitMask = Categoria.ground
         
         addChild(player)
@@ -62,10 +58,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     func createMap() {
         let staticBodies: [(SKSpriteNode, CGSize, CGPoint)] = [
-            (SKSpriteNode(color: .green, size: CGSize(width: frame.width, height: 10)), CGSize(width: frame.width, height: 10), CGPoint(x: frame.midX, y: frame.minY + 20)), // chão
-            (SKSpriteNode(color: .green, size: CGSize(width: 20, height: frame.height)), CGSize(width: 20, height: frame.height), CGPoint(x: frame.minX, y: frame.midY)), // parede esq
-            (SKSpriteNode(color: .green, size: CGSize(width: 20, height: frame.height)), CGSize(width: 20, height: frame.height), CGPoint(x: frame.maxX, y: frame.midY)), // parede dir
-            (SKSpriteNode(color: .green, size: CGSize(width: frame.width, height: 10)), CGSize(width: frame.width, height: 10), CGPoint(x: frame.midX, y: frame.maxY - 20)), // teto
+            (SKSpriteNode(color: .green, size: CGSize(width: frame.width, height: 10)), CGSize(width: frame.width, height: 10), CGPoint(x: frame.midX, y: frame.minY + 20)),
+            (SKSpriteNode(color: .green, size: CGSize(width: 20, height: frame.height)), CGSize(width: 20, height: frame.height), CGPoint(x: frame.minX, y: frame.midY)),
+            (SKSpriteNode(color: .green, size: CGSize(width: 20, height: frame.height)), CGSize(width: 20, height: frame.height), CGPoint(x: frame.maxX, y: frame.midY)),
+            (SKSpriteNode(color: .green, size: CGSize(width: frame.width, height: 10)), CGSize(width: frame.width, height: 10), CGPoint(x: frame.midX, y: frame.maxY - 20)),
             (SKSpriteNode(color: .green, size: CGSize(width: 400, height: 5)), CGSize(width: 400, height: 5), CGPoint(x: frame.minX, y: frame.minY + 75)),
             (SKSpriteNode(color: .green, size: CGSize(width: 800, height: 5)), CGSize(width: 800, height: 5), CGPoint(x: frame.minX, y: frame.minY + 130)),
             (SKSpriteNode(color: .green, size: CGSize(width: 300, height: 5)), CGSize(width: 300, height: 5), CGPoint(x: frame.minX + 550, y: frame.minY + 100)),
@@ -88,34 +84,52 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func createDeathPools() {
-        // Exemplo: cria 2 poças de perda (death pools) no mapa
-        let pool1 = SKSpriteNode(color: .red, size: CGSize(width: 100, height: 30))
-        pool1.position = CGPoint(x: frame.midX + 200, y: frame.minY + 40)
+        let pool1 = SKSpriteNode(color: .red, size: CGSize(width: 100, height: 10))
+        pool1.position = CGPoint(x: frame.midX + 200, y: frame.minY + 25)
         pool1.name = "deathPool"
         pool1.alpha = 0.7
-        
         pool1.physicsBody = SKPhysicsBody(rectangleOf: pool1.size)
         pool1.physicsBody?.isDynamic = false
         pool1.physicsBody?.categoryBitMask = Categoria.deathPool
         pool1.physicsBody?.contactTestBitMask = Categoria.player
         pool1.physicsBody?.collisionBitMask = Categoria.none
-        
         addChild(pool1)
         
-        let pool2 = SKSpriteNode(color: .red, size: CGSize(width: 150, height: 40))
-        pool2.position = CGPoint(x: frame.midX - 150, y: frame.minY + 100)
+        let pool2 = SKSpriteNode(color: .blue, size: CGSize(width: 100, height: 10))
+        pool2.position = CGPoint(x: frame.midX , y: frame.minY + 25)
         pool2.name = "deathPool"
         pool2.alpha = 0.7
-        
         pool2.physicsBody = SKPhysicsBody(rectangleOf: pool2.size)
         pool2.physicsBody?.isDynamic = false
         pool2.physicsBody?.categoryBitMask = Categoria.deathPool
         pool2.physicsBody?.contactTestBitMask = Categoria.player
         pool2.physicsBody?.collisionBitMask = Categoria.none
-        
         addChild(pool2)
     }
     
+    func createLever() {
+        lever = SKSpriteNode(color: .yellow, size: CGSize(width: 10, height: 50))
+        lever.position = CGPoint(x: frame.midX - 100, y: frame.minY + 50)
+        lever.name = "lever"
+        lever.alpha = 0.9
+        addChild(lever)
+    }
+    
+    func didBegin(_ contact: SKPhysicsContact) {
+        let categoriaA = contact.bodyA.categoryBitMask
+        let categoriaB = contact.bodyB.categoryBitMask
+
+        if (categoriaA == Categoria.player && categoriaB == Categoria.deathPool) ||
+           (categoriaB == Categoria.player && categoriaA == Categoria.deathPool) {
+            if let currentScene = self.scene,
+               let view = currentScene.view {
+                let novaCena = type(of: currentScene).init(size: currentScene.size)
+                novaCena.scaleMode = currentScene.scaleMode
+                view.presentScene(novaCena, transition: SKTransition.fade(withDuration: 0.5))
+            }
+        }
+    }
+
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         for touch in touches {
             let location = touch.location(in: self)
@@ -130,6 +144,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 if let velocityY = player.physicsBody?.velocity.dy, abs(velocityY) < 1 {
                     player.physicsBody?.applyImpulse(CGVector(dx: 0, dy: 8))
                 }
+            case "lever":
+                if player.position.distance(to: lever.position) < 80 {
+                    print("Alavanca ativada!")
+                    // Aqui pode adicionar lógica de ativar uma porta, ponte, etc.
+                }
             default:
                 break
             }
@@ -140,7 +159,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         for touch in touches {
             let location = touch.location(in: self)
             let node = atPoint(location)
-            
             switch node.name {
             case "leftButton":
                 moveLeft = false
@@ -151,37 +169,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             }
         }
     }
-    
-    func didBegin(_ contact: SKPhysicsContact) {
-        var firstBody : SKPhysicsBody
-        var secondBody : SKPhysicsBody
-        
-        // Organizar corpos por categoria
-        if contact.bodyA.categoryBitMask < contact.bodyB.categoryBitMask {
-            firstBody = contact.bodyA
-            secondBody = contact.bodyB
-        } else {
-            firstBody = contact.bodyB
-            secondBody = contact.bodyA
-        }
-        
-        if firstBody.categoryBitMask == Categoria.deathPool &&
-            secondBody.categoryBitMask == Categoria.player {
-            // Player tocou na poça de morte -> resetar posição
-            if let playerNode = secondBody.node as? SKSpriteNode {
-                
-                resetPlayerPosition(playerNode)
-            }
-        }
-    }
-    
-    func resetPlayerPosition(_ playerNode: SKSpriteNode) {
-        // Desativa a física temporariamente para resetar posição sem problemas
-        playerNode.physicsBody?.velocity = CGVector.zero
-        playerNode.physicsBody?.angularVelocity = 0
-        playerNode.position = initialPlayerPosition
-    }
-    
+
     func createControls() {
         let buttonSize = CGSize(width: 60, height: 60)
         let padding: CGFloat = 30
@@ -214,5 +202,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         } else {
             player.physicsBody?.velocity.dx = 0
         }
+    }
+}
+
+extension CGPoint {
+    func distance(to point: CGPoint) -> CGFloat {
+        return hypot(x - point.x, y - point.y)
     }
 }
