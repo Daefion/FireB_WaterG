@@ -5,9 +5,10 @@ struct Categoria {
     static let none : UInt32 = 0
     static let all : UInt32 = UInt32.max
     static let player : UInt32 = 0b1        // 1
-    static let deathPool : UInt32 = 0b10    // 2
+    static let deathPool : UInt32 = 0b10   // 2
     static let ground : UInt32 = 0b100      // 4 (para chão e paredes)
     static let lever : UInt32 = 0b1000      // 8 (alavanca)
+    static let platform : UInt32 = 0b10000
 }
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
@@ -21,8 +22,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     var lever: SKSpriteNode!
     
+    var platform : SKSpriteNode!
+    
     var moveLeft = false
     var moveRight = false
+    
     
     override func didMove(to view: SKView) {
         backgroundColor = SKColor.black
@@ -35,6 +39,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         createDeathPools()
         createControls()
         createLever()
+        createPlatform()
     }
     
     func createPlayer() {
@@ -51,7 +56,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         player.physicsBody?.categoryBitMask = Categoria.player
         player.physicsBody?.contactTestBitMask = Categoria.deathPool | Categoria.ground
-        player.physicsBody?.collisionBitMask = Categoria.ground
+        player.physicsBody?.collisionBitMask = Categoria.ground | Categoria.lever
         
         addChild(player)
     }
@@ -108,16 +113,35 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func createLever() {
-        lever = SKSpriteNode(color: .yellow, size: CGSize(width: 10, height: 50))
-        lever.position = CGPoint(x: frame.midX - 100, y: frame.minY + 50)
+        lever = SKSpriteNode(color: .yellow, size: CGSize(width: 6, height: 30))
+        lever.position = CGPoint(x: frame.midX - 100, y: frame.minY + 35)
         lever.name = "lever"
-        lever.alpha = 0.9
+        
+        
+        lever.physicsBody = SKPhysicsBody(rectangleOf: lever.size)
+        lever.physicsBody?.isDynamic = false // Para não se mover
+        lever.physicsBody?.categoryBitMask = Categoria.lever
+        lever.physicsBody?.contactTestBitMask = Categoria.player
+        lever.physicsBody?.collisionBitMask = Categoria.player
         addChild(lever)
+    }
+    
+    func createPlatform() {
+        let platform1 = SKSpriteNode(color: .white, size: CGSize(width: 80, height: 10))
+        platform1.position = CGPoint(x: frame.minX + 54, y: frame.midY + 10)
+        platform1.name = "platform"
+        platform1.physicsBody = SKPhysicsBody(rectangleOf: platform1.size)
+        platform1.physicsBody?.isDynamic = false
+        platform1.physicsBody?.categoryBitMask = Categoria.platform
+        platform1.physicsBody?.contactTestBitMask = Categoria.player
+        platform1.physicsBody?.collisionBitMask = Categoria.player
+        addChild(platform1)
     }
     
     func didBegin(_ contact: SKPhysicsContact) {
         let categoriaA = contact.bodyA.categoryBitMask
         let categoriaB = contact.bodyB.categoryBitMask
+        
 
         if (categoriaA == Categoria.player && categoriaB == Categoria.deathPool) ||
            (categoriaB == Categoria.player && categoriaA == Categoria.deathPool) {
@@ -128,6 +152,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 view.presentScene(novaCena, transition: SKTransition.fade(withDuration: 0.5))
             }
         }
+        if (categoriaA == Categoria.player && categoriaB == Categoria.lever){
+            let rotateAction = SKAction.rotate(byAngle: .pi / -4, duration: 0.2)
+                    lever.run(rotateAction)
+            lever.physicsBody?.contactTestBitMask = Categoria.none
+
+            
+        }
+        
+        
     }
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -144,13 +177,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 if let velocityY = player.physicsBody?.velocity.dy, abs(velocityY) < 1 {
                     player.physicsBody?.applyImpulse(CGVector(dx: 0, dy: 8))
                 }
-            case "lever":
-                if player.position.distance(to: lever.position) < 80 {
-                    print("Alavanca ativada!")
-                    // Aqui pode adicionar lógica de ativar uma porta, ponte, etc.
-                }
             default:
                 break
+                
             }
         }
     }
@@ -202,6 +231,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         } else {
             player.physicsBody?.velocity.dx = 0
         }
+        
     }
 }
 
