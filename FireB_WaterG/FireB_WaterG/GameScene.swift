@@ -6,9 +6,13 @@ struct Categoria {
     static let all : UInt32 = UInt32.max
     static let player : UInt32 = 0b1        // 1
     static let deathPool : UInt32 = 0b10   // 2
+    static let greenPool : UInt32 = 0b10
     static let ground : UInt32 = 0b100      // 4 (para chão e paredes)
     static let lever : UInt32 = 0b1000      // 8 (alavanca)
-    static let platform : UInt32 = 0b10000
+    static let button1 : UInt32 = 0b100
+    static let button2 : UInt32 = 0b100
+    static let platform : UInt32 = 0b100
+    static let platform2 : UInt32 = 0b100
 }
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
@@ -22,7 +26,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     var lever: SKSpriteNode!
     
-    var platform : SKSpriteNode!
+    var platform1 : SKSpriteNode!
+    var platform2 : SKSpriteNode!
+    
+    var button1 : SKSpriteNode!
+    var button2 : SKSpriteNode!
     
     var moveLeft = false
     var moveRight = false
@@ -40,6 +48,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         createControls()
         createLever()
         createPlatform()
+        createGreenPool()
+        createButton()
     }
     
     func createPlayer() {
@@ -55,7 +65,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         player.physicsBody?.friction = 0.2
         
         player.physicsBody?.categoryBitMask = Categoria.player
-        player.physicsBody?.contactTestBitMask = Categoria.deathPool | Categoria.ground
+        player.physicsBody?.contactTestBitMask = Categoria.deathPool | Categoria.ground | Categoria.greenPool
         player.physicsBody?.collisionBitMask = Categoria.ground | Categoria.lever
         
         addChild(player)
@@ -112,6 +122,19 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         addChild(pool2)
     }
     
+    func createGreenPool(){
+        let greenPool = SKSpriteNode(color: .init(red: 0, green: 0.65, blue: 0, alpha: 1), size: CGSize(width: 100, height: 10))
+        greenPool.position = CGPoint(x: frame.midX + 100, y: frame.minY + 105)
+        greenPool.name = "GreenPool"
+        greenPool.alpha = 0.7
+        greenPool.physicsBody = SKPhysicsBody(rectangleOf: greenPool.size)
+        greenPool.physicsBody?.isDynamic = false
+        greenPool.physicsBody?.categoryBitMask = Categoria.greenPool
+        greenPool.physicsBody?.contactTestBitMask = Categoria.player
+        greenPool.physicsBody?.collisionBitMask = Categoria.none
+        addChild(greenPool)
+    }
+    
     func createLever() {
         lever = SKSpriteNode(color: .yellow, size: CGSize(width: 6, height: 30))
         lever.position = CGPoint(x: frame.midX - 100, y: frame.minY + 35)
@@ -126,16 +149,57 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         addChild(lever)
     }
     
+    func createButton(){
+        button1 = SKSpriteNode(color: .yellow, size: CGSize(width: 6, height: 30))
+        button1.position = CGPoint(x: frame.midX - 100, y: frame.minY + 35)
+        button1.name = "button1"
+        
+        
+        button1.physicsBody = SKPhysicsBody(rectangleOf: lever.size)
+        button1.physicsBody?.isDynamic = false // Para não se mover
+        button1.physicsBody?.categoryBitMask = Categoria.lever
+        button1.physicsBody?.contactTestBitMask = Categoria.player
+        button1.physicsBody?.collisionBitMask = Categoria.player
+        addChild(button1)
+        
+        //button 2
+        button2 = SKSpriteNode(color: .yellow, size: CGSize(width: 6, height: 30))
+        button2.position = CGPoint(x: frame.midX - 100, y: frame.minY + 35)
+        button2.name = "button2"
+        
+        
+        button2.physicsBody = SKPhysicsBody(rectangleOf: lever.size)
+        button2.physicsBody?.isDynamic = false // Para não se mover
+        button2.physicsBody?.categoryBitMask = Categoria.lever
+        button2.physicsBody?.contactTestBitMask = Categoria.player
+        button2.physicsBody?.collisionBitMask = Categoria.player
+        addChild(button2)
+        
+    }
+    
     func createPlatform() {
-        let platform1 = SKSpriteNode(color: .white, size: CGSize(width: 80, height: 10))
+        platform1 = SKSpriteNode(color: .white, size: CGSize(width: 80, height: 10))
         platform1.position = CGPoint(x: frame.minX + 54, y: frame.midY + 10)
         platform1.name = "platform"
+        
         platform1.physicsBody = SKPhysicsBody(rectangleOf: platform1.size)
         platform1.physicsBody?.isDynamic = false
         platform1.physicsBody?.categoryBitMask = Categoria.platform
         platform1.physicsBody?.contactTestBitMask = Categoria.player
         platform1.physicsBody?.collisionBitMask = Categoria.player
         addChild(platform1)
+        
+        //platform2
+        platform2 = SKSpriteNode(color: .white, size: CGSize(width: 80, height: 10))
+        platform2.position = CGPoint(x: frame.minX + 54, y: frame.midY + 10)
+        platform2.name = "platform"
+        
+        platform2.physicsBody = SKPhysicsBody(rectangleOf: platform2.size)
+        platform2.physicsBody?.isDynamic = false
+        platform2.physicsBody?.categoryBitMask = Categoria.platform
+        platform2.physicsBody?.contactTestBitMask = Categoria.player
+        platform2.physicsBody?.collisionBitMask = Categoria.player
+        addChild(platform2)
     }
     
     func didBegin(_ contact: SKPhysicsContact) {
@@ -157,7 +221,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                     lever.run(rotateAction)
             lever.physicsBody?.contactTestBitMask = Categoria.none
 
-            
+            let platformDown = SKAction.move(to: CGPoint(x: frame.minX + 54, y: frame.midY - 40), duration: 1)
+                    platform1.run(platformDown)
+        }
+        
+        if (categoriaA == Categoria.player && categoriaB == Categoria.button1){
+            let movePlatform2 = SKAction.move(to: CGPoint(x: frame.minX + 54, y: frame.midY - 40), duration: 1)
+                platform2.run(movePlatform2)
         }
         
         
