@@ -7,15 +7,16 @@ struct Categoria {
     static let player : UInt32 = 0b1        // 1
     static let deathPool : UInt32 = 0b10   // 2
     static let greenPool : UInt32 = 0b10
-    static let ground : UInt32 = 0b100      // 4 (para chão e paredes)
-    static let lever : UInt32 = 0b1000      // 8 (alavanca)
-    static let button1 : UInt32 = 0b100
-    static let button2 : UInt32 = 0b100
+    static let ground : UInt32 = 0b1000      // 4 (para chão e paredes)
+    static let lever : UInt32 = 0b1      // 8 (alavanca)
+    static let button1 : UInt32 = 0b0
+    static let button2 : UInt32 = 0b10
     static let platform : UInt32 = 0b100
     static let platform2 : UInt32 = 0b100
 }
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
+    
     
     var player: SKSpriteNode!
     var initialPlayerPosition = CGPoint.zero
@@ -25,15 +26,19 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var jumpButton: SKSpriteNode!
     
     var lever: SKSpriteNode!
+    var platform1: SKSpriteNode!
+    var platform2: SKSpriteNode!
+    var platform2InitialPosition: CGPoint!
     
-    var platform1 : SKSpriteNode!
-    var platform2 : SKSpriteNode!
-    
-    var button1 : SKSpriteNode!
-    var button2 : SKSpriteNode!
+    var button1: SKSpriteNode!
+    var button2: SKSpriteNode!
     
     var moveLeft = false
     var moveRight = false
+    
+    let scaleButton = SKAction.scaleY(to: 0.5, duration: 1.0)
+    let scaleButtonUp = SKAction.scaleY(to: 1.0, duration: 1.0)
+    
     
     
     override func didMove(to view: SKView) {
@@ -48,6 +53,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         createControls()
         createLever()
         createPlatform()
+        platform2InitialPosition = platform2.position
         createGreenPool()
         createButton()
     }
@@ -150,27 +156,27 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func createButton(){
-        button1 = SKSpriteNode(color: .yellow, size: CGSize(width: 6, height: 30))
-        button1.position = CGPoint(x: frame.midX - 100, y: frame.minY + 35)
+        button1 = SKSpriteNode(color: .purple , size: CGSize(width: 20, height: 10))
+        button1.position = CGPoint(x: frame.midX - 200, y: frame.midY + 10)
         button1.name = "button1"
         
         
         button1.physicsBody = SKPhysicsBody(rectangleOf: lever.size)
         button1.physicsBody?.isDynamic = false // Para não se mover
-        button1.physicsBody?.categoryBitMask = Categoria.lever
+        button1.physicsBody?.categoryBitMask = Categoria.button1
         button1.physicsBody?.contactTestBitMask = Categoria.player
         button1.physicsBody?.collisionBitMask = Categoria.player
         addChild(button1)
         
         //button 2
-        button2 = SKSpriteNode(color: .yellow, size: CGSize(width: 6, height: 30))
-        button2.position = CGPoint(x: frame.midX - 100, y: frame.minY + 35)
+        button2 = SKSpriteNode(color: .purple, size: CGSize(width: 20, height: 10))
+        button2.position = CGPoint(x: frame.midX + 100, y: frame.midY + 60)
         button2.name = "button2"
         
         
         button2.physicsBody = SKPhysicsBody(rectangleOf: lever.size)
         button2.physicsBody?.isDynamic = false // Para não se mover
-        button2.physicsBody?.categoryBitMask = Categoria.lever
+        button2.physicsBody?.categoryBitMask = Categoria.button2
         button2.physicsBody?.contactTestBitMask = Categoria.player
         button2.physicsBody?.collisionBitMask = Categoria.player
         addChild(button2)
@@ -190,8 +196,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         addChild(platform1)
         
         //platform2
-        platform2 = SKSpriteNode(color: .white, size: CGSize(width: 80, height: 10))
-        platform2.position = CGPoint(x: frame.minX + 54, y: frame.midY + 10)
+        platform2 = SKSpriteNode(color: .purple, size: CGSize(width: 60, height: 10))
+        platform2.position = CGPoint(x: frame.maxX - 60, y: frame.midY + 58)
         platform2.name = "platform"
         
         platform2.physicsBody = SKPhysicsBody(rectangleOf: platform2.size)
@@ -204,34 +210,70 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     func didBegin(_ contact: SKPhysicsContact) {
         let categoriaA = contact.bodyA.categoryBitMask
-        let categoriaB = contact.bodyB.categoryBitMask
-        
+                let categoriaB = contact.bodyB.categoryBitMask
+                
+                if (categoriaA == Categoria.player && categoriaB == Categoria.deathPool) ||
+                   (categoriaB == Categoria.player && categoriaA == Categoria.deathPool) {
+                    if let currentScene = self.scene,
+                       let view = currentScene.view {
+                        let novaCena = type(of: currentScene).init(size: currentScene.size)
+                        novaCena.scaleMode = currentScene.scaleMode
+                        view.presentScene(novaCena, transition: SKTransition.fade(withDuration: 0.5))
+                    }
+                }
+                
+                if (categoriaA == Categoria.player && categoriaB == Categoria.lever) {
+                    let rotateAction = SKAction.rotate(byAngle: .pi / -4, duration: 0.2)
+                    lever.run(rotateAction)
+                    lever.physicsBody?.contactTestBitMask = Categoria.none
 
-        if (categoriaA == Categoria.player && categoriaB == Categoria.deathPool) ||
-           (categoriaB == Categoria.player && categoriaA == Categoria.deathPool) {
-            if let currentScene = self.scene,
-               let view = currentScene.view {
-                let novaCena = type(of: currentScene).init(size: currentScene.size)
-                novaCena.scaleMode = currentScene.scaleMode
-                view.presentScene(novaCena, transition: SKTransition.fade(withDuration: 0.5))
+                    let platformDown = SKAction.move(to: CGPoint(x: frame.minX + 54, y: frame.midY - 40), duration: 1)
+                    platform1.run(platformDown)
+                }
+                
+                if (categoriaA == Categoria.player && categoriaB == Categoria.button1) ||
+                   (categoriaB == Categoria.player && categoriaA == Categoria.button1) {
+                    let movePlatform2 = SKAction.move(to: CGPoint(x: frame.maxX - 60, y: frame.midY + 10), duration: 1)
+                    platform2.run(movePlatform2)
+                    button1.run(scaleButton)
+                }
+                
+                if (categoriaA == Categoria.player && categoriaB == Categoria.button2) ||
+                   (categoriaB == Categoria.player && categoriaA == Categoria.button2) {
+                    let movePlatform2 = SKAction.move(to: CGPoint(x: frame.maxX - 60, y: frame.midY + 10), duration: 1)
+                    platform2.run(movePlatform2)
+                    button2.run(scaleButton)
+                }
+    }
+    
+    func didEnd(_ contact: SKPhysicsContact) {
+            let categoriaA = contact.bodyA.categoryBitMask
+            let categoriaB = contact.bodyB.categoryBitMask
+            
+            // When player leaves either button
+            if (categoriaA == Categoria.player && categoriaB == Categoria.button1) ||
+               (categoriaB == Categoria.player && categoriaA == Categoria.button1) ||
+               (categoriaA == Categoria.player && categoriaB == Categoria.button2) ||
+               (categoriaB == Categoria.player && categoriaA == Categoria.button2) {
+                
+                // Check if player is not contacting any button
+                var contactingButton = false
+                player.physicsBody?.allContactedBodies().forEach { body in
+                    if body.node?.physicsBody?.categoryBitMask == Categoria.button1 ||
+                       body.node?.physicsBody?.categoryBitMask == Categoria.button2 {
+                        contactingButton = true
+                    }
+                }
+                
+                if !contactingButton {
+                    let movePlatform2Up = SKAction.move(to: platform2InitialPosition, duration: 1)
+                    platform2.run(movePlatform2Up)
+                    
+                    button1.run(scaleButtonUp)
+                    button2.run(scaleButtonUp)
+                }
             }
         }
-        if (categoriaA == Categoria.player && categoriaB == Categoria.lever){
-            let rotateAction = SKAction.rotate(byAngle: .pi / -4, duration: 0.2)
-                    lever.run(rotateAction)
-            lever.physicsBody?.contactTestBitMask = Categoria.none
-
-            let platformDown = SKAction.move(to: CGPoint(x: frame.minX + 54, y: frame.midY - 40), duration: 1)
-                    platform1.run(platformDown)
-        }
-        
-        if (categoriaA == Categoria.player && categoriaB == Categoria.button1){
-            let movePlatform2 = SKAction.move(to: CGPoint(x: frame.minX + 54, y: frame.midY - 40), duration: 1)
-                platform2.run(movePlatform2)
-        }
-        
-        
-    }
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         for touch in touches {
@@ -301,6 +343,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         } else {
             player.physicsBody?.velocity.dx = 0
         }
+        
         
     }
 }

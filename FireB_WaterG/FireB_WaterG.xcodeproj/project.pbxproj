@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		036764B92DEDAAF100E259E8 /* GameOverScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 036764B82DEDAAF100E259E8 /* GameOverScene.swift */; };
 		0D6910D82DCE02F800E27B39 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D6910D72DCE02F800E27B39 /* AppDelegate.swift */; };
 		0D6910DE2DCE02F800E27B39 /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D6910DD2DCE02F800E27B39 /* GameScene.swift */; };
 		0D6910E02DCE02F800E27B39 /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D6910DF2DCE02F800E27B39 /* GameViewController.swift */; };
@@ -33,6 +34,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		036764B82DEDAAF100E259E8 /* GameOverScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameOverScene.swift; sourceTree = "<group>"; };
 		0D6910D42DCE02F800E27B39 /* FireB_WaterG.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FireB_WaterG.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0D6910D72DCE02F800E27B39 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		0D6910DD2DCE02F800E27B39 /* GameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScene.swift; sourceTree = "<group>"; };
@@ -96,6 +98,7 @@
 				0D6910E12DCE02F800E27B39 /* Main.storyboard */,
 				0D6910E42DCE02FA00E27B39 /* Assets.xcassets */,
 				0D6910E62DCE02FA00E27B39 /* LaunchScreen.storyboard */,
+				036764B82DEDAAF100E259E8 /* GameOverScene.swift */,
 			);
 			path = FireB_WaterG;
 			sourceTree = "<group>";
@@ -233,6 +236,7 @@
 			files = (
 				0D6910DE2DCE02F800E27B39 /* GameScene.swift in Sources */,
 				0D6910E02DCE02F800E27B39 /* GameViewController.swift in Sources */,
+				036764B92DEDAAF100E259E8 /* GameOverScene.swift in Sources */,
 				0D6910D82DCE02F800E27B39 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
