@@ -70,7 +70,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 background.size = self.size
                 addChild(background)
         
-        let backgroundMusic = SKAudioNode(fileNamed: "Adventure.mp4")
+        let backgroundMusic = SKAudioNode(fileNamed: "adv.mp3")
             backgroundMusic.autoplayLooped = true
             addChild(backgroundMusic)
         
@@ -105,7 +105,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             
             player1.physicsBody?.categoryBitMask = Categoria.player1
             player1.physicsBody?.contactTestBitMask = Categoria.deathPool2 | Categoria.greenPool
-            player1.physicsBody?.collisionBitMask = Categoria.ground | Categoria.lever
+        player1.physicsBody?.collisionBitMask = Categoria.ground | Categoria.lever | Categoria.platform
             addChild(player1)
             
             // Player 2 (new player)
@@ -122,7 +122,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             
             player2.physicsBody?.categoryBitMask = Categoria.player2
             player2.physicsBody?.contactTestBitMask = Categoria.deathPool1 | Categoria.greenPool
-        player2.physicsBody?.collisionBitMask = Categoria.ground | Categoria.lever
+        player2.physicsBody?.collisionBitMask = Categoria.ground | Categoria.lever | Categoria.platform
             addChild(player2)
         }
     
@@ -373,48 +373,47 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func didEnd(_ contact: SKPhysicsContact) {
-            let categoriaA = contact.bodyA.categoryBitMask
-            let categoriaB = contact.bodyB.categoryBitMask
+        let categoriaA = contact.bodyA.categoryBitMask
+        let categoriaB = contact.bodyB.categoryBitMask
+        
+        // Check if either player left either button
+        if (categoriaA == Categoria.button1 || categoriaA == Categoria.button2 ||
+            categoriaB == Categoria.button1 || categoriaB == Categoria.button2) {
             
-            // When player leaves either button
-            if (categoriaA == Categoria.player1 | Categoria.player2 && categoriaB == Categoria.button1) ||
-               (categoriaB == Categoria.player1 | Categoria.player2 && categoriaA == Categoria.button1) ||
-               (categoriaA == Categoria.player1 | Categoria.player2 && categoriaB == Categoria.button2) ||
-               (categoriaB == Categoria.player1 | Categoria.player2 && categoriaA == Categoria.button2) {
-                
-                // Check if player is not contacting any button
-                var contactingButton = false
-                player1.physicsBody?.allContactedBodies().forEach { body in
-                    if body.node?.physicsBody?.categoryBitMask == Categoria.button1 ||
-                       body.node?.physicsBody?.categoryBitMask == Categoria.button2 {
-                        contactingButton = true
-                    }
-                    
+            // Check if any player is still touching any button
+            var anyPlayerTouchingButton = false
+            
+            // Check player1's contacts
+            player1.physicsBody?.allContactedBodies().forEach { body in
+                if body.node?.physicsBody?.categoryBitMask == Categoria.button1 ||
+                    body.node?.physicsBody?.categoryBitMask == Categoria.button2 {
+                    anyPlayerTouchingButton = true
                 }
-                var contactingButton2 = false
+            }
+            
+            // Check player2's contacts if player1 wasn't touching
+            if !anyPlayerTouchingButton {
                 player2.physicsBody?.allContactedBodies().forEach { body in
                     if body.node?.physicsBody?.categoryBitMask == Categoria.button1 ||
                         body.node?.physicsBody?.categoryBitMask == Categoria.button2 {
-                        contactingButton2 = true
+                        anyPlayerTouchingButton = true
                     }
                 }
+            }
+            
+            // If no players are touching any button, move platform back up
+            if !anyPlayerTouchingButton {
+                let movePlatform2 = SKAction.move(to: platform2InitialPosition, duration: 1)
+                platform2.run(movePlatform2)
                 
-                if !contactingButton {
-                    let movePlatform2Up = SKAction.move(to: platform2InitialPosition, duration: 1)
-                    platform2.run(movePlatform2Up)
-                    
-                    button1.run(scaleButtonUp)
-                    button2.run(scaleButtonUp)
-                }
-                else if !contactingButton2 {
-                    let movePlatform2Up = SKAction.move(to: platform2InitialPosition, duration: 1)
-                    platform2.run(movePlatform2Up)
-                    
-                    button1.run(scaleButtonUp)
-                    button2.run(scaleButtonUp)
-                }
+                // Also reset button scales
+                button1.run(scaleButtonUp)
+                button2.run(scaleButtonUp)
             }
         }
+    }
+    
+
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
             for touch in touches {

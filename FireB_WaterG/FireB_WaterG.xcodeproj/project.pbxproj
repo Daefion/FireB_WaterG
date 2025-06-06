@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		036764B92DEDAAF100E259E8 /* GameOverScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 036764B82DEDAAF100E259E8 /* GameOverScene.swift */; };
+		03C22FB32DF2E90300ECE3BE /* adv.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 03C22FB22DF2E90300ECE3BE /* adv.mp3 */; };
 		0D6910D82DCE02F800E27B39 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D6910D72DCE02F800E27B39 /* AppDelegate.swift */; };
 		0D6910DE2DCE02F800E27B39 /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D6910DD2DCE02F800E27B39 /* GameScene.swift */; };
 		0D6910E02DCE02F800E27B39 /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D6910DF2DCE02F800E27B39 /* GameViewController.swift */; };
@@ -35,7 +36,7 @@
 
 /* Begin PBXFileReference section */
 		036764B82DEDAAF100E259E8 /* GameOverScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameOverScene.swift; sourceTree = "<group>"; };
-		03C47BC02DF0AFDD009CEDD4 /* Adventure.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; name = Adventure.mp4; path = ../../../Adventure.mp4; sourceTree = "<group>"; };
+		03C22FB22DF2E90300ECE3BE /* adv.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; name = adv.mp3; path = ../../../adv.mp3; sourceTree = "<group>"; };
 		0D6910D42DCE02F800E27B39 /* FireB_WaterG.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FireB_WaterG.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0D6910D72DCE02F800E27B39 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		0D6910DD2DCE02F800E27B39 /* GameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScene.swift; sourceTree = "<group>"; };
@@ -100,7 +101,7 @@
 				0D6910E42DCE02FA00E27B39 /* Assets.xcassets */,
 				0D6910E62DCE02FA00E27B39 /* LaunchScreen.storyboard */,
 				036764B82DEDAAF100E259E8 /* GameOverScene.swift */,
-				03C47BC02DF0AFDD009CEDD4 /* Adventure.mp4 */,
+				03C22FB22DF2E90300ECE3BE /* adv.mp3 */,
 			);
 			path = FireB_WaterG;
 			sourceTree = "<group>";
@@ -209,6 +210,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				03C22FB32DF2E90300ECE3BE /* adv.mp3 in Resources */,
 				0D6910E32DCE02F800E27B39 /* Main.storyboard in Resources */,
 				0D6910E52DCE02FA00E27B39 /* Assets.xcassets in Resources */,
 				0D6910E82DCE02FA00E27B39 /* LaunchScreen.storyboard in Resources */,
